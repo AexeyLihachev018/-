@@ -240,7 +240,7 @@ function buildGreenTable(sheet) {
   sheet.setRowHeight(ROW+1, 40);
 
   // 30 строк для ввода
-  const managers = ['Менеджер 1', 'Менеджер 2', 'Менеджер 3', 'Менеджер 4', 'Менеджер 5'];
+  const managers = ['Бабурин И.', 'Волкова Т.', 'Микрюкова А.', 'Юргина И.', 'Ожегов А.', 'Лихачев А.'];
   for (let i = 0; i < 30; i++) {
     const r = ROW + 2 + i;
     const bg = i % 2 === 0 ? '#F0F7ED' : WHITE;
@@ -285,7 +285,7 @@ function buildOrangeTable(sheet) {
        .setWrap(true).setVerticalAlignment('middle');
   sheet.setRowHeight(ROW+1, 50);
 
-  const managers = ['Менеджер 1', 'Менеджер 2', 'Менеджер 3', 'Менеджер 4', 'Менеджер 5'];
+  const managers = ['Бабурин И.', 'Волкова Т.', 'Микрюкова А.', 'Юргина И.', 'Ожегов А.', 'Лихачев А.'];
 
   managers.forEach((mgr, i) => {
     const r = ROW + 2 + i;
@@ -323,13 +323,13 @@ function buildOrangeTable(sheet) {
     sheet.setConditionalFormatRules(rules);
   });
 
-  // Итого
-  const totalRow = ROW + 7;
+  // Итого (6 менеджеров: строки ROW+2 … ROW+7)
+  const totalRow = ROW + 8;
   setCell(sheet, totalRow, 1, 'ИТОГО', ORANGE_LIGHT, '#000000', true, 10);
   const sumCols = [2, 3, 4, 5, 7, 9];
   sumCols.forEach(c => {
     const col = String.fromCharCode(64 + c);
-    sheet.getRange(totalRow, c).setFormula(`=SUM(${col}${ROW+2}:${col}${ROW+6})`)
+    sheet.getRange(totalRow, c).setFormula(`=SUM(${col}${ROW+2}:${col}${ROW+7})`)
          .setBackground(ORANGE_LIGHT).setFontWeight('bold');
     if (c === 7) sheet.getRange(totalRow, c).setNumberFormat('#,##0 ₽');
   });
