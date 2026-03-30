@@ -280,7 +280,7 @@ function buildOrangeTable(sheet) {
   const h = [['Менеджер', 'Новые лиды', 'Сделки', 'Отклики старая база',
               'Старая база', 'Конверсия лиды→сделки', 'Факт выручки (₽)',
               'Конверсия в продажу', 'Постоплатные сделки', 'Реализованные сделки', '', '']];
-  sheet.getRange(ROW+1, 1, 1, 10).setValues(h)
+  sheet.getRange(ROW+1, 1, 1, 12).setValues(h)
        .setBackground(ORANGE_LIGHT).setFontWeight('bold').setFontSize(9)
        .setWrap(true).setVerticalAlignment('middle');
   sheet.setRowHeight(ROW+1, 50);
