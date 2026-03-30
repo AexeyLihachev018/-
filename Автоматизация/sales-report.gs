@@ -363,7 +363,7 @@ function createSummarySheet(ss) {
   const h = [['Месяц', 'Факт выручки (₽)', '% плана', 'Новых лидов', 'Сделок',
               'Конверсия', 'Гидростанции', 'Гидроцилиндры', 'Прочее',
               'Средний чек (₽)', 'Менеджеров активных', 'Лучший менеджер', 'Примечания', '']];
-  summary.getRange(2,1,1,13).setValues(h)
+  summary.getRange(2,1,1,14).setValues(h)
          .setBackground(DARK).setFontColor(WHITE).setFontWeight('bold').setFontSize(10)
          .setWrap(true).setVerticalAlignment('middle');
   summary.setRowHeight(2, 45);
