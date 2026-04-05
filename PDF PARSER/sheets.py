@@ -51,6 +51,18 @@ FIELD_MAP = {
 
 
 def _get_client() -> gspread.Client:
+    # На Streamlit Cloud — читаем из st.secrets
+    try:
+        import streamlit as st
+        if "gcp_service_account" in st.secrets:
+            creds = Credentials.from_service_account_info(
+                dict(st.secrets["gcp_service_account"]),
+                scopes=SCOPES,
+            )
+            return gspread.authorize(creds)
+    except Exception:
+        pass
+    # Локально — читаем из файла credentials.json
     creds = Credentials.from_service_account_file(GOOGLE_CREDENTIALS_FILE, scopes=SCOPES)
     return gspread.authorize(creds)
 
