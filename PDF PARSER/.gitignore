@@ -1,0 +1,14 @@
+# Секретные файлы — не пушим
+.env
+credentials.json
+processed.json
+
+# Папки с реальными питчами — не пушим
+pitches/
+Питчи*/
+*.pdf
+
+# Системные
+.DS_Store
+__pycache__/
+*.pyc
