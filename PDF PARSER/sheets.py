@@ -23,6 +23,8 @@ COLUMNS = [
     "Запрашиваемые инвестиции",
     "На что идут деньги",
     "Контакты",
+    "Оценка (1-10)",
+    "Комментарий инвестора",
     "Файл источника",
     "Дата парсинга",
 ]
@@ -43,6 +45,8 @@ FIELD_MAP = {
     "Запрашиваемые инвестиции": "инвестиции_запрос",
     "На что идут деньги": "бюджет_на_что",
     "Контакты": "контакты",
+    "Оценка (1-10)": "оценка_привлекательности",
+    "Комментарий инвестора": "комментарий_инвестора",
 }
 
 
@@ -66,7 +70,7 @@ def get_or_create_sheet(meeting_name: str) -> gspread.Worksheet:
             cols=len(COLUMNS),
         )
         sheet.append_row(COLUMNS)
-        # Жирный заголовок
+        # Жирный заголовок с синим фоном
         last_col_letter = chr(ord("A") + len(COLUMNS) - 1)
         sheet.format(f"A1:{last_col_letter}1", {
             "textFormat": {"bold": True},
@@ -77,8 +81,21 @@ def get_or_create_sheet(meeting_name: str) -> gspread.Worksheet:
     return sheet
 
 
-def write_pitch(sheet: gspread.Worksheet, data: dict, filename: str):
-    """Добавляет строку с данными питча в лист."""
+def is_duplicate(sheet: gspread.Worksheet, filename: str) -> bool:
+    """Проверяет, был ли файл уже записан в этот лист."""
+    col_index = COLUMNS.index("Файл источника") + 1  # 1-based
+    existing_files = sheet.col_values(col_index)
+    return filename in existing_files
+
+
+def write_pitch(sheet: gspread.Worksheet, data: dict, filename: str) -> bool:
+    """
+    Добавляет строку с данными питча в лист.
+    Возвращает True если записано, False если дубль (файл уже есть в листе).
+    """
+    if is_duplicate(sheet, filename):
+        return False
+
     row = []
     for col in COLUMNS:
         if col == "Файл источника":
@@ -90,3 +107,4 @@ def write_pitch(sheet: gspread.Worksheet, data: dict, filename: str):
             row.append(data.get(field_key, "не указано"))
 
     sheet.append_row(row, value_input_option="USER_ENTERED")
+    return True

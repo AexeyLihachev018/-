@@ -159,11 +159,16 @@ if run and uploaded_files and meeting_name.strip():
                         st.write("Подключаюсь к Google Sheets...")
                         sheet = get_or_create_sheet(meeting_name.strip())
 
-                    write_pitch(sheet, data, uploaded_file.name)
+                    written = write_pitch(sheet, data, uploaded_file.name)
 
                     project_name = data.get("название_проекта", "?")
-                    file_status.update(label=f"✅ {uploaded_file.name} → «{project_name}»", state="complete")
-                    results.append({"file": uploaded_file.name, "project": project_name, "ok": True, "data": data})
+                    if written:
+                        file_status.update(label=f"✅ {uploaded_file.name} → «{project_name}»", state="complete")
+                        results.append({"file": uploaded_file.name, "project": project_name, "ok": True, "duplicate": False, "data": data})
+                    else:
+                        file_status.update(label=f"⚠️ {uploaded_file.name} — уже в таблице (пропущен)", state="complete")
+                        st.warning("Файл уже был записан в этот лист ранее. Дубль не создан.")
+                        results.append({"file": uploaded_file.name, "project": project_name, "ok": True, "duplicate": True, "data": data})
 
                 except Exception as e:
                     file_status.update(label=f"❌ {uploaded_file.name} — ошибка", state="error")
@@ -174,17 +179,22 @@ if run and uploaded_files and meeting_name.strip():
 
     # ── Итоги ────────────────────────────────────────────────────────────────
     st.divider()
-    ok_count = sum(1 for r in results if r["ok"])
-    err_count = len(results) - ok_count
+    ok_count = sum(1 for r in results if r["ok"] and not r.get("duplicate"))
+    dup_count = sum(1 for r in results if r.get("duplicate"))
+    err_count = len(results) - ok_count - dup_count
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
     col1.metric("Обработано файлов", len(results))
-    col2.metric("Успешно", ok_count)
-    col3.metric("Ошибок", err_count)
+    col2.metric("Записано", ok_count)
+    col3.metric("Дублей пропущено", dup_count)
+    col4.metric("Ошибок", err_count)
 
-    if ok_count > 0:
+    if ok_count > 0 or dup_count > 0:
         sheets_url = f"https://docs.google.com/spreadsheets/d/{os.getenv('SPREADSHEET_ID')}/edit"
-        st.success(f"Данные записаны на лист **«{meeting_name}»**")
+        if ok_count > 0:
+            st.success(f"Данные записаны на лист **«{meeting_name}»**")
+        if dup_count > 0:
+            st.info(f"Пропущено дублей: **{dup_count}** — эти файлы уже были в таблице")
         st.link_button("📊 Открыть Google Sheets", sheets_url, use_container_width=True)
 
     # ── Таблица результатов ───────────────────────────────────────────────────
@@ -195,8 +205,15 @@ if run and uploaded_files and meeting_name.strip():
         for r in results:
             if not r["ok"]:
                 continue
-            with st.expander(f"📄 {r['file']}  →  **{r['project']}**"):
-                d = r["data"]
+            d = r["data"]
+            score = d.get("оценка_привлекательности", "—")
+            dup_label = " *(дубль, не записан)*" if r.get("duplicate") else ""
+            expander_label = f"📄 {r['file']}  →  **{r['project']}**  |  Оценка: **{score}/10**{dup_label}"
+            with st.expander(expander_label):
+                # Блок оценки
+                comment = d.get("комментарий_инвестора", "—")
+                st.info(f"**Комментарий инвестора:** {comment}")
+
                 col1, col2 = st.columns(2)
                 with col1:
                     st.markdown(f"**Сфера:** {d.get('сфера_индустрия', '—')}")
